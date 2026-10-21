@@ -1,0 +1,740 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sebastian is Turning 5! - Minecraft Birthday Invitation</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts for retro Minecraft typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* Font classes */
+    .font-pixel { font-family: 'Press Start 2P', monospace; }
+    .font-silkscreen { font-family: 'Silkscreen', monospace; }
+    .font-vt { font-family: 'VT323', monospace; }
+
+    /* Custom Diamond Pickaxe SVG Cursor */
+    .pickaxe-cursor {
+      cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 32 32' shape-rendering='crispEdges'><rect x='22' y='4' width='4' height='4' fill='%232cf0e4'/><rect x='26' y='8' width='4' height='4' fill='%2319c5be'/><rect x='18' y='8' width='4' height='4' fill='%235dfbee'/><rect x='14' y='12' width='4' height='4' fill='%232cf0e4'/><rect x='10' y='16' width='4' height='4' fill='%23805327'/><rect x='6' y='20' width='4' height='4' fill='%235a3917'/><rect x='2' y='24' width='4' height='4' fill='%233b230d'/><rect x='22' y='8' width='4' height='4' fill='%23108682'/><rect x='18' y='12' width='4' height='4' fill='%23108682'/></svg>") 4 28, auto;
+    }
+
+    /* 3D Minecraft Title Text Effects */
+    .minecraft-title {
+      font-family: 'Press Start 2P', monospace;
+      color: #55FF55;
+      text-shadow: 
+        3px 3px 0px #1a5e1a,
+        -1px -1px 0px #0a290a,
+        1px -1px 0px #0a290a,
+        -1px 1px 0px #0a290a,
+        3px 4px 6px rgba(0, 0, 0, 0.75);
+    }
+
+    .minecraft-number-5 {
+      font-family: 'Press Start 2P', monospace;
+      color: #FFAA00;
+      text-shadow: 
+        4px 4px 0px #994c00,
+        -1px -1px 0px #4d2600,
+        1px -1px 0px #4d2600,
+        -1px 1px 0px #4d2600,
+        4px 5px 8px rgba(0,0,0,0.6);
+      animation: pulse-badge 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse-badge {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    /* Minecraft UI Button Styler */
+    .mc-btn {
+      background: #7f7f7f;
+      border: 3px solid;
+      border-color: #dcdcdc #3f3f3f #3f3f3f #dcdcdc;
+      box-shadow: inset -3px -3px 0px #585858, inset 3px 3px 0px #bcbcbc;
+      text-shadow: 2px 2px 0px #222;
+      transition: all 0.1s ease;
+    }
+    .mc-btn:hover {
+      background: #8b8b8b;
+      border-color: #ffffff #2f2f2f #2f2f2f #ffffff;
+    }
+    .mc-btn:active {
+      border-color: #3f3f3f #dcdcdc #dcdcdc #3f3f3f;
+      box-shadow: inset 3px 3px 0px #2a2a2a;
+      transform: translateY(2px);
+    }
+
+    .mc-btn-green {
+      background: #2e8b57;
+      border-color: #52cc7a #154527 #154527 #52cc7a;
+      box-shadow: inset -3px -3px 0px #1f633d, inset 3px 3px 0px #70e096;
+    }
+    .mc-btn-green:hover {
+      background: #38a568;
+    }
+
+    /* Prevent default gestures on touch screen */
+    canvas {
+      touch-action: none;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* Floating block animation */
+    @keyframes float-gentle {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+    .floating-block { animation: float-gentle 3.5s ease-in-out infinite; }
+  </style>
+</head>
+<body class="bg-stone-900 min-h-screen flex flex-col items-center justify-center p-2 sm:p-4 select-none pickaxe-cursor overflow-x-hidden font-silkscreen text-white">
+
+  <!-- TOP HUD: MINING XP PROGRESS & CONTROLS (ALL IN ENGLISH) -->
+  <header class="fixed top-2 sm:top-4 z-40 flex items-center justify-between w-full max-w-lg px-3">
+    <!-- Minecraft XP / Mining bar -->
+    <div class="flex-1 mr-3 bg-stone-950/85 p-2 rounded-lg border-2 border-stone-700 shadow-xl backdrop-blur">
+      <div class="flex justify-between items-center text-xs mb-1">
+        <span class="text-amber-400 font-pixel tracking-wider text-[9px] sm:text-[10px]">⛏️ MINE TO REVEAL:</span>
+        <span id="progress-text" class="text-emerald-400 font-pixel text-[10px]">0%</span>
+      </div>
+      <div class="w-full bg-stone-800 h-3 border border-black relative overflow-hidden">
+        <div id="progress-bar" class="h-full bg-gradient-to-r from-lime-500 to-emerald-400 transition-all duration-150 w-0"></div>
+      </div>
+    </div>
+
+    <!-- Quick Reveal Button -->
+    <button onclick="revealAllInstantly()" class="mc-btn px-2.5 py-2 mr-2 text-[10px] font-pixel text-amber-200 active:scale-95" title="Instant Reveal">
+      ⚡ REVEAL
+    </button>
+
+    <!-- Mute / Sound Toggle -->
+    <button id="sound-btn" onclick="toggleMute()" class="mc-btn px-3 py-2 text-xs flex items-center gap-1 text-white active:scale-95" title="Mute/Unmute Audio">
+      <span id="sound-icon">🔊</span>
+    </button>
+  </header>
+
+  <!-- MAIN INVITATION FRAME -->
+  <main class="relative w-full max-w-md sm:max-w-lg aspect-[9/13.8] rounded-2xl shadow-2xl overflow-hidden border-4 border-stone-800 bg-sky-300 mt-14 mb-3 select-none">
+
+    <!-- ==============================================
+         BACKGROUND & INVITATION CARD (REVEALED LAYER)
+         ============================================== -->
+    <section id="invitation-card" class="absolute inset-0 flex flex-col justify-between p-4 sm:p-6 overflow-hidden bg-gradient-to-b from-[#4295e8] via-[#8ecffc] to-[#5a9c40]">
+
+      <!-- Minecraft Sun -->
+      <div class="absolute top-4 right-4 w-12 h-12 bg-amber-200 border-2 border-yellow-400 shadow-[0_0_25px_rgba(255,220,50,0.9)] pointer-events-none"></div>
+
+      <!-- Floating islands with waterfalls (Left & Right) -->
+      <div class="absolute top-16 -left-2 pointer-events-none floating-block opacity-90">
+        <svg width="65" height="90" viewBox="0 0 65 90" shape-rendering="crispEdges">
+          <rect x="0" y="0" width="60" height="16" fill="#579427"/>
+          <rect x="5" y="16" width="50" height="26" fill="#784824"/>
+          <rect x="15" y="42" width="28" height="22" fill="#503017"/>
+          <!-- Waterfall stream -->
+          <rect x="36" y="16" width="6" height="60" fill="#3aa5e8" opacity="0.8"/>
+          <rect x="38" y="22" width="3" height="40" fill="#9de1ff"/>
+        </svg>
+      </div>
+
+      <div class="absolute top-24 -right-2 pointer-events-none floating-block opacity-90" style="animation-delay: -1.5s;">
+        <svg width="65" height="95" viewBox="0 0 65 95" shape-rendering="crispEdges">
+          <rect x="5" y="0" width="60" height="16" fill="#579427"/>
+          <rect x="10" y="16" width="50" height="28" fill="#784824"/>
+          <rect x="22" y="44" width="26" height="22" fill="#503017"/>
+          <!-- Waterfall stream -->
+          <rect x="18" y="16" width="6" height="65" fill="#3aa5e8" opacity="0.8"/>
+          <rect x="20" y="24" width="3" height="45" fill="#9de1ff"/>
+        </svg>
+      </div>
+
+      <!-- TOP: ALEX & STEVE JUMPING IN THE SKY -->
+      <div class="absolute top-3 left-4 pointer-events-none">
+        <!-- Alex with Diamond Sword -->
+        <svg class="w-16 h-20 drop-shadow-lg transform -rotate-12" viewBox="0 0 32 48" shape-rendering="crispEdges">
+          <rect x="8" y="4" width="16" height="14" fill="#cf7038"/>
+          <rect x="10" y="8" width="12" height="10" fill="#f5cda4"/>
+          <rect x="10" y="11" width="3" height="3" fill="#317f43"/>
+          <rect x="19" y="11" width="3" height="3" fill="#317f43"/>
+          <rect x="6" y="18" width="20" height="16" fill="#548037"/>
+          <rect x="8" y="34" width="7" height="12" fill="#6a523a"/>
+          <rect x="17" y="34" width="7" height="12" fill="#6a523a"/>
+          <!-- Diamond Sword -->
+          <rect x="0" y="0" width="8" height="8" fill="#2cf0e4"/>
+          <rect x="4" y="6" width="4" height="10" fill="#1b968f"/>
+        </svg>
+      </div>
+
+      <div class="absolute top-3 right-4 pointer-events-none">
+        <!-- Steve Jumping with Pickaxe -->
+        <svg class="w-16 h-20 drop-shadow-lg transform rotate-12" viewBox="0 0 32 48" shape-rendering="crispEdges">
+          <rect x="8" y="4" width="16" height="14" fill="#4d3221"/>
+          <rect x="10" y="8" width="12" height="10" fill="#f2be8d"/>
+          <rect x="10" y="11" width="3" height="3" fill="#2b53a7"/>
+          <rect x="19" y="11" width="3" height="3" fill="#2b53a7"/>
+          <rect x="6" y="18" width="20" height="16" fill="#00a8a8"/>
+          <rect x="8" y="34" width="7" height="12" fill="#2c3b82"/>
+          <rect x="17" y="34" width="7" height="12" fill="#2c3b82"/>
+          <!-- Pickaxe -->
+          <rect x="24" y="0" width="8" height="6" fill="#805327"/>
+          <rect x="22" y="4" width="4" height="12" fill="#555"/>
+        </svg>
+      </div>
+
+      <!-- INVITATION HEADER (JOIN US TO CELEBRATE) -->
+      <header class="relative z-10 text-center pt-8 sm:pt-10">
+        <h2 class="text-xs sm:text-sm md:text-base font-pixel font-bold tracking-wider text-[#08284d] drop-shadow-[0_1px_2px_rgba(255,255,255,0.85)]">
+          JOIN US TO CELEBRATE
+        </h2>
+
+        <!-- Divider with tiny Minecraft grass blocks -->
+        <div class="flex items-center justify-center gap-1.5 my-2.5">
+          <div class="w-10 sm:w-16 h-[2px] bg-[#08284d]/30"></div>
+          <div class="w-2.5 h-2.5 bg-emerald-600 border border-black shadow"></div>
+          <div class="w-2.5 h-2.5 bg-amber-700 border border-black shadow"></div>
+          <div class="w-2.5 h-2.5 bg-emerald-600 border border-black shadow"></div>
+          <div class="w-10 sm:w-16 h-[2px] bg-[#08284d]/30"></div>
+        </div>
+
+        <!-- MAIN NAME: SEBASTIAN -->
+        <h1 class="minecraft-title text-2xl sm:text-3xl md:text-4xl tracking-wider uppercase mt-1">
+          SEBASTIAN
+        </h1>
+
+        <!-- HIGHLIGHTED AGE: "IS TURNING 5" -->
+        <div class="flex items-center justify-center gap-2 mt-2">
+          <span class="text-sm sm:text-base md:text-lg font-pixel tracking-wider text-stone-900 bg-white/70 px-2.5 py-0.5 rounded border border-stone-400 shadow-sm">
+            IS TURNING
+          </span>
+          <span class="minecraft-number-5 text-3xl sm:text-4xl inline-block px-1">
+            5
+          </span>
+        </div>
+      </header>
+
+      <!-- EVENT TIME & DATE -->
+      <section class="relative z-10 my-auto text-center space-y-2 py-1">
+        <!-- Event Time -->
+        <div class="inline-block bg-[#0a2f54]/90 text-cyan-200 px-3.5 py-1.5 rounded border-2 border-cyan-400/60 shadow-lg">
+          <p class="font-pixel text-[10px] sm:text-xs tracking-wide">
+            COME TO PLAY &amp; CELEBRATE: 2-5 PM
+          </p>
+        </div>
+
+        <!-- Discreet Date Highlight (Saturday, 14/11) -->
+        <div class="flex items-center justify-center gap-2 pt-1">
+          <div class="w-6 h-[1.5px] bg-stone-700"></div>
+          <span class="font-pixel text-xs sm:text-sm text-stone-900 font-bold bg-amber-100/90 border border-amber-600/50 px-3 py-1 rounded shadow-sm">
+            SATURDAY, 14/11
+          </span>
+          <div class="w-6 h-[1.5px] bg-stone-700"></div>
+        </div>
+      </section>
+
+      <!-- LOCATION & RSVP DETAILS -->
+      <footer class="relative z-10 text-center pb-24 sm:pb-28">
+        <!-- Location details -->
+        <div class="bg-stone-900/85 backdrop-blur-sm border-2 border-stone-600 rounded p-2.5 max-w-[92%] mx-auto shadow-xl mb-2">
+          <p class="font-pixel text-[9px] sm:text-[10px] text-amber-300 leading-relaxed uppercase tracking-wider">
+            SCHELDEDAL 110<br>
+            2904 HG, CAPELLE A/D IJSSEL
+          </p>
+        </div>
+
+        <!-- RSVP Details -->
+        <div class="inline-block bg-black/75 border border-stone-600 px-3 py-1.5 rounded">
+          <p class="font-pixel text-[9px] sm:text-[10px] text-emerald-300">
+            RSVP: ANNE: <a href="https://wa.me/31628373609?text=Hi%20Anne!%20Confirming%20attendance%20for%20Sebastian's%205th%20birthday%20party!" target="_blank" class="underline hover:text-white cursor-pointer">0628373609</a>
+          </p>
+        </div>
+      </footer>
+
+      <!-- BOTTOM DECORATIVE MINECRAFT MOBS & BIRTHDAY BOY -->
+      <div class="absolute bottom-0 left-0 right-0 h-28 pointer-events-none flex items-end justify-between px-2 overflow-hidden">
+        <!-- Zombie Mob -->
+        <svg class="w-13 h-20 -mb-2 transform -scale-x-100 drop-shadow-md" viewBox="0 0 32 48" shape-rendering="crispEdges">
+          <rect x="8" y="0" width="16" height="16" fill="#3b7a37"/>
+          <rect x="10" y="4" width="4" height="4" fill="#082b06"/>
+          <rect x="18" y="4" width="4" height="4" fill="#082b06"/>
+          <rect x="6" y="16" width="20" height="18" fill="#1b7899"/>
+          <rect x="0" y="18" width="6" height="14" fill="#3b7a37"/>
+          <rect x="26" y="18" width="6" height="14" fill="#3b7a37"/>
+          <rect x="8" y="34" width="7" height="14" fill="#2d3a66"/>
+          <rect x="17" y="34" width="7" height="14" fill="#2d3a66"/>
+        </svg>
+
+        <!-- Cute Wolf -->
+        <svg class="w-12 h-14 -mb-1 drop-shadow-md" viewBox="0 0 28 28" shape-rendering="crispEdges">
+          <rect x="4" y="2" width="6" height="4" fill="#888"/>
+          <rect x="18" y="2" width="6" height="4" fill="#888"/>
+          <rect x="6" y="6" width="16" height="14" fill="#d6d6d6"/>
+          <rect x="8" y="8" width="3" height="3" fill="#111"/>
+          <rect x="17" y="8" width="3" height="3" fill="#111"/>
+          <rect x="11" y="13" width="6" height="4" fill="#444"/>
+          <rect x="8" y="19" width="12" height="3" fill="#cc2222"/>
+          <rect x="6" y="22" width="16" height="6" fill="#c4c4c4"/>
+        </svg>
+
+        <!-- Birthday Boy Avatar (Sebastian) -->
+        <svg class="w-16 h-24 mb-0 z-10 drop-shadow-lg" viewBox="0 0 32 48" shape-rendering="crispEdges">
+          <!-- Blonde Hair -->
+          <rect x="8" y="0" width="16" height="16" fill="#f0c242"/>
+          <rect x="8" y="0" width="16" height="6" fill="#dfad2b"/>
+          <rect x="10" y="6" width="12" height="10" fill="#f7d3a1"/>
+          <!-- Eyes -->
+          <rect x="10" y="8" width="3" height="3" fill="#2c75d3"/>
+          <rect x="19" y="8" width="3" height="3" fill="#2c75d3"/>
+          <!-- Smile -->
+          <rect x="14" y="13" width="4" height="2" fill="#7a3628"/>
+          <!-- Blue striped shirt -->
+          <rect x="6" y="16" width="20" height="18" fill="#1b4985"/>
+          <rect x="6" y="20" width="20" height="4" fill="#2c75d3"/>
+          <rect x="6" y="28" width="20" height="4" fill="#2c75d3"/>
+          <rect x="0" y="16" width="6" height="14" fill="#1b4985"/>
+          <rect x="26" y="16" width="6" height="14" fill="#1b4985"/>
+          <!-- Dark Pants -->
+          <rect x="8" y="34" width="7" height="14" fill="#1f242e"/>
+          <rect x="17" y="34" width="7" height="14" fill="#1f242e"/>
+        </svg>
+
+        <!-- Minecraft Pig -->
+        <svg class="w-13 h-14 -mb-1 drop-shadow-md" viewBox="0 0 28 28" shape-rendering="crispEdges">
+          <rect x="4" y="4" width="20" height="16" fill="#f09696"/>
+          <rect x="6" y="8" width="3" height="3" fill="#111"/>
+          <rect x="19" y="8" width="3" height="3" fill="#111"/>
+          <rect x="10" y="12" width="8" height="6" fill="#d97171"/>
+          <rect x="12" y="14" width="2" height="2" fill="#501a1a"/>
+          <rect x="15" y="14" width="2" height="2" fill="#501a1a"/>
+          <rect x="6" y="20" width="16" height="8" fill="#e58383"/>
+        </svg>
+
+        <!-- Creeper Mob -->
+        <svg class="w-13 h-22 -mb-2 drop-shadow-md" viewBox="0 0 32 48" shape-rendering="crispEdges">
+          <rect x="8" y="0" width="16" height="16" fill="#32a842"/>
+          <rect x="10" y="4" width="4" height="4" fill="#000"/>
+          <rect x="18" y="4" width="4" height="4" fill="#000"/>
+          <rect x="13" y="8" width="6" height="7" fill="#000"/>
+          <rect x="11" y="11" width="10" height="6" fill="#000"/>
+          <rect x="11" y="15" width="3" height="4" fill="#000"/>
+          <rect x="18" y="15" width="3" height="4" fill="#000"/>
+          <rect x="10" y="16" width="12" height="18" fill="#299338"/>
+          <rect x="8" y="34" width="7" height="14" fill="#1e732a"/>
+          <rect x="17" y="34" width="7" height="14" fill="#1e732a"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         CANVAS SCRATCH DIRT OVERLAY LAYER
+         ============================================== -->
+    <canvas id="scratch-canvas" class="absolute inset-0 z-20 w-full h-full"></canvas>
+
+    <!-- FLOATING INSTRUCTION BANNER (IN ENGLISH) -->
+    <div id="instruction-banner" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 pointer-events-none transition-opacity duration-300">
+      <div class="bg-black/85 border-2 border-amber-400 px-3.5 py-1.5 rounded text-center shadow-lg animate-bounce">
+        <p class="font-pixel text-[9px] sm:text-[11px] text-amber-300 tracking-wider">
+          ⛏️ CLICK &amp; DRAG TO MINE! ⛏️
+        </p>
+      </div>
+    </div>
+
+    <!-- LEVEL UP / COMPLETED MODAL OVERLAY (IN ENGLISH) -->
+    <div id="complete-modal" class="absolute inset-0 z-30 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center opacity-0 pointer-events-none transition-all duration-500 scale-95">
+      <!-- Pixel Diamond -->
+      <div class="w-16 h-16 mb-2 animate-bounce">
+        <svg viewBox="0 0 32 32" shape-rendering="crispEdges" class="w-full h-full drop-shadow-[0_0_20px_#2cf0e4]">
+          <polygon points="16,2 30,12 16,30 2,12" fill="#2cf0e4"/>
+          <polygon points="16,2 24,12 16,30 8,12" fill="#5dfbee"/>
+          <polygon points="16,2 20,12 16,30 12,12" fill="#ffffff"/>
+        </svg>
+      </div>
+
+      <h3 class="minecraft-title text-xl sm:text-2xl mb-1 text-emerald-400">INVITATION UNLOCKED!</h3>
+      <p class="font-pixel text-[10px] text-stone-300 mb-5 max-w-xs">You found Sebastian's birthday treasure!</p>
+
+      <div class="flex flex-col gap-3 w-full max-w-xs">
+        <!-- Direct WhatsApp RSVP -->
+        <a href="https://wa.me/31628373609?text=Hi%20Anne!%20We%20would%20love%20to%20attend%20Sebastian's%205th%20birthday%20party!" 
+           target="_blank" 
+           class="mc-btn mc-btn-green py-3 px-4 font-pixel text-xs text-white rounded flex items-center justify-center gap-2 shadow-lg tracking-wider">
+          <span>💬</span> CONFIRM RSVP (WHATSAPP)
+        </a>
+
+        <!-- View Full Invitation Button -->
+        <button onclick="dismissModal()" class="mc-btn py-2.5 px-4 font-pixel text-[11px] text-stone-200 rounded">
+          VIEW INVITATION
+        </button>
+
+        <!-- Re-mine option -->
+        <button onclick="resetMining()" class="text-stone-400 hover:text-white font-pixel text-[9px] py-1 underline">
+          ⛏️ MINE AGAIN
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footnote in English -->
+  <footer class="text-stone-400 text-xs font-vt text-center tracking-wider">
+    Capelle aan den IJssel • 14/11 • Sebastian is turning 5!
+  </footer>
+
+  <!-- ==============================================
+       JAVASCRIPT LOGIC (AUDIO, SCRATCH, PARTICLES)
+       ============================================== -->
+  <script>
+    // Audio Context & State
+    let audioCtx = null;
+    let isMuted = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      document.getElementById('sound-icon').textContent = isMuted ? '🔇' : '🔊';
+      if (!isMuted) initAudio();
+    }
+
+    // Synthesize 8-Bit Minecraft Dig / Break Sound
+    function playDigSound() {
+      if (isMuted) return;
+      try {
+        initAudio();
+        const now = audioCtx.currentTime;
+
+        // White noise for crunchy dirt breaking sound
+        const bufferSize = audioCtx.sampleRate * 0.07;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(320 + Math.random() * 180, now);
+        filter.frequency.exponentialRampToValueAtTime(100, now + 0.06);
+
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.setValueAtTime(0.35, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.07);
+
+        noise.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        noise.start(now);
+      } catch (e) {
+        // Fallback for strict browser audio policy
+      }
+    }
+
+    // Level-up Chime Sound (Minecraft Experience / Fanfare)
+    function playLevelUpSound() {
+      if (isMuted) return;
+      try {
+        initAudio();
+        const notes = [440, 554, 659, 880]; // A4, C#5, E5, A5
+        notes.forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          const startTime = audioCtx.currentTime + (idx * 0.1);
+
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(freq, startTime);
+
+          gain.gain.setValueAtTime(0.18, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.start(startTime);
+          osc.stop(startTime + 0.4);
+        });
+      } catch (e) {}
+    }
+
+    // Canvas Scratch Setup
+    const canvas = document.getElementById('scratch-canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    let isDrawing = false;
+    let hasCompleted = false;
+    let lastProgressCheck = 0;
+    let digThrottle = 0;
+
+    // Generate authentic procedural Minecraft Dirt & Grass texture onto canvas
+    function renderDirtWall() {
+      const width = canvas.width;
+      const height = canvas.height;
+      if (width === 0 || height === 0) return;
+
+      const blockSize = Math.max(16, Math.floor(width / 18));
+
+      // Dirt Palette
+      const dirtColors = ['#866043', '#724f33', '#573d26', '#9c7352', '#6a472c'];
+      // Grass Palette
+      const grassColors = ['#4c9429', '#5bb332', '#3e7822', '#6dcc3b'];
+
+      for (let y = 0; y < height; y += blockSize) {
+        for (let x = 0; x < width; x += blockSize) {
+          const isTopLayer = (y < blockSize * 1.5);
+          const colorList = isTopLayer ? grassColors : dirtColors;
+          const baseColor = colorList[Math.floor(Math.random() * colorList.length)];
+
+          ctx.fillStyle = baseColor;
+          ctx.fillRect(x, y, blockSize, blockSize);
+
+          // Sub-pixel noise inside block
+          const subSize = blockSize / 4;
+          for (let sy = 0; sy < blockSize; sy += subSize) {
+            for (let sx = 0; sx < blockSize; sx += subSize) {
+              if (Math.random() > 0.6) {
+                ctx.fillStyle = isTopLayer && sy < subSize * 2 
+                  ? grassColors[Math.floor(Math.random() * grassColors.length)]
+                  : dirtColors[Math.floor(Math.random() * dirtColors.length)];
+                ctx.fillRect(x + sx, y + sy, subSize, subSize);
+              }
+            }
+          }
+
+          // Subtle grid outline
+          ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(x, y, blockSize, blockSize);
+        }
+      }
+
+      // Root drops hanging from grass
+      const rootY = blockSize;
+      for (let x = 0; x < width; x += blockSize / 2) {
+        const hang = Math.floor(Math.random() * (blockSize * 0.7));
+        ctx.fillStyle = '#4c9429';
+        ctx.fillRect(x, rootY, blockSize / 2, hang);
+      }
+    }
+
+    // Resize and initialize canvas
+    function initCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      renderDirtWall();
+      hasCompleted = false;
+      document.getElementById('progress-bar').style.width = '0%';
+      document.getElementById('progress-text').innerText = '0%';
+      document.getElementById('instruction-banner').style.opacity = '1';
+    }
+
+    // Digging / Scratch Action
+    function scratch(x, y) {
+      if (hasCompleted) return;
+
+      initAudio();
+
+      const now = Date.now();
+      if (now - digThrottle > 90) {
+        playDigSound();
+        digThrottle = now;
+      }
+
+      const rect = canvas.getBoundingClientRect();
+      const clientX = x - rect.left;
+      const clientY = y - rect.top;
+
+      // Erase transparent hole
+      ctx.globalCompositeOperation = 'destination-out';
+      const radius = Math.min(rect.width, rect.height) * 0.085;
+
+      ctx.beginPath();
+      ctx.arc(clientX, clientY, radius, 0, Math.PI * 2, false);
+      ctx.fill();
+
+      // Blocky pixelated excavation edges
+      for (let i = 0; i < 3; i++) {
+        const offsetAngle = Math.random() * Math.PI * 2;
+        const offsetDist = Math.random() * radius * 0.9;
+        const bitX = clientX + Math.cos(offsetAngle) * offsetDist;
+        const bitY = clientY + Math.sin(offsetAngle) * offsetDist;
+        const bitSize = 8 + Math.random() * 12;
+        ctx.fillRect(bitX - bitSize / 2, bitY - bitSize / 2, bitSize, bitSize);
+      }
+
+      // Periodically check reveal progress
+      if (now - lastProgressCheck > 200) {
+        checkProgress();
+        lastProgressCheck = now;
+      }
+
+      const banner = document.getElementById('instruction-banner');
+      if (banner && banner.style.opacity !== '0') {
+        banner.style.opacity = '0';
+      }
+    }
+
+    // Calculate excavated area
+    function checkProgress() {
+      if (hasCompleted) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      const w = Math.floor(canvas.width);
+      const h = Math.floor(canvas.height);
+
+      const step = 24 * dpr;
+      let totalSampled = 0;
+      let clearedSampled = 0;
+
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+
+      for (let y = 0; y < h; y += step) {
+        for (let x = 0; x < w; x += step) {
+          totalSampled++;
+          const alphaIndex = (y * w + x) * 4 + 3;
+          if (data[alphaIndex] < 128) {
+            clearedSampled++;
+          }
+        }
+      }
+
+      const percent = Math.min(100, Math.round((clearedSampled / totalSampled) * 100));
+      document.getElementById('progress-bar').style.width = percent + '%';
+      document.getElementById('progress-text').innerText = percent + '%';
+
+      // 70% revealed triggers full completion celebration
+      if (percent >= 70) {
+        completeExcavation();
+      }
+    }
+
+    // Quick reveal button handler
+    function revealAllInstantly() {
+      if (hasCompleted) return;
+      completeExcavation();
+    }
+
+    // Complete Excavation Sequence
+    function completeExcavation() {
+      if (hasCompleted) return;
+      hasCompleted = true;
+
+      document.getElementById('progress-bar').style.width = '100%';
+      document.getElementById('progress-text').innerText = '100%';
+
+      canvas.style.transition = 'opacity 0.6s ease-out';
+      canvas.style.opacity = '0';
+      setTimeout(() => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.style.display = 'none';
+      }, 600);
+
+      playLevelUpSound();
+
+      // Confetti burst
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 90,
+          spread: 75,
+          origin: { y: 0.6 },
+          colors: ['#2cf0e4', '#55FF55', '#FFAA00', '#ffffff', '#805327']
+        });
+        setTimeout(() => {
+          confetti({
+            particleCount: 50,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 },
+            colors: ['#2cf0e4', '#55FF55']
+          });
+          confetti({
+            particleCount: 50,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 },
+            colors: ['#FFAA00', '#55FF55']
+          });
+        }, 300);
+      }
+
+      // Show English Completion Modal
+      const modal = document.getElementById('complete-modal');
+      modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+      modal.classList.add('opacity-100', 'scale-100');
+    }
+
+    function dismissModal() {
+      const modal = document.getElementById('complete-modal');
+      modal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+      modal.classList.remove('opacity-100', 'scale-100');
+    }
+
+    function resetMining() {
+      dismissModal();
+      canvas.style.display = 'block';
+      canvas.style.opacity = '1';
+      canvas.style.transition = 'none';
+      initCanvas();
+    }
+
+    // Mouse Listeners
+    canvas.addEventListener('mousedown', (e) => {
+      isDrawing = true;
+      scratch(e.clientX, e.clientY);
+    });
+    window.addEventListener('mouseup', () => { isDrawing = false; });
+    canvas.addEventListener('mousemove', (e) => {
+      if (!isDrawing) return;
+      scratch(e.clientX, e.clientY);
+    });
+
+    // Touch Listeners (Mobile & Tablet)
+    canvas.addEventListener('touchstart', (e) => {
+      isDrawing = true;
+      const touch = e.touches[0];
+      scratch(touch.clientX, touch.clientY);
+    }, { passive: true });
+
+    canvas.addEventListener('touchend', () => { isDrawing = false; });
+    canvas.addEventListener('touchcancel', () => { isDrawing = false; });
+
+    canvas.addEventListener('touchmove', (e) => {
+      if (!isDrawing) return;
+      const touch = e.touches[0];
+      scratch(touch.clientX, touch.clientY);
+    }, { passive: true });
+
+    // Handle Window Resize
+    window.addEventListener('resize', () => {
+      if (!hasCompleted) {
+        initCanvas();
+      }
+    });
+
+    window.onload = function() {
+      initCanvas();
+    };
+  </script>
+</body>
+</html>
+```
